@@ -1,0 +1,14 @@
+<!doctype html>
+<html lang="vi"><head><meta charset="utf-8"><title>FPT Employee Management</title>
+<style>body{font-family:Arial;max-width:900px;margin:30px auto}input,button{padding:8px;margin:3px}table{width:100%;border-collapse:collapse}th,td{border:1px solid #ccc;padding:8px}</style></head>
+<body><h1>Quản lý nhân viên FPT</h1>
+<form><input id="id" type="number" placeholder="ID khi cập nhật" readonly><input id="name" placeholder="Tên"><input id="salary" type="number" placeholder="Lương"><button id="add" type="button">Thêm</button><button id="update" type="button">Cập nhật</button></form>
+<p id="message"></p><table><thead><tr><th>ID</th><th>Tên</th><th>Lương</th><th>Thao tác</th></tr></thead><tbody id="rows"></tbody></table>
+<script>
+const api='/api/employees';
+async function load(){const r=await fetch(api);const data=await r.json();const rows=document.querySelector('#rows');rows.replaceChildren();data.forEach(e=>{const tr=document.createElement('tr');tr.innerHTML=`<td>${e.id}</td><td>${e.name}</td><td>${e.salary}</td><td><button>Chọn sửa</button></td>`;tr.querySelector('button').onclick=()=>{document.querySelector('#id').value=e.id;document.querySelector('#name').value=e.name;document.querySelector('#salary').value=e.salary};rows.append(tr)})}
+function employee(){const id=document.querySelector('#id').value,name=document.querySelector('#name').value.trim(),salary=Number(document.querySelector('#salary').value);if(!name||salary<0)throw Error('Tên và lương không hợp lệ');return{id:id?Number(id):null,name,salary}}
+document.querySelector('#add').onclick=async()=>{try{const e=employee();delete e.id;const r=await fetch(api,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(e)});if(!r.ok)throw Error('Thêm thất bại');document.querySelector('#message').textContent='Đã thêm nhân viên';load()}catch(x){document.querySelector('#message').textContent=x.message}}
+document.querySelector('#update').onclick=async()=>{try{const e=employee();if(!e.id)throw Error('Hãy chọn nhân viên để cập nhật');const r=await fetch(api,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(e)});if(!r.ok)throw Error('Cập nhật thất bại');document.querySelector('#message').textContent='Đã cập nhật nhân viên';load()}catch(x){document.querySelector('#message').textContent=x.message}}
+load();
+</script></body></html>
